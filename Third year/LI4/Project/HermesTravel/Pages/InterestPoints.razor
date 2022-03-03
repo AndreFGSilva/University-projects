@@ -1,0 +1,403 @@
+@page "/InterestPoints"
+
+@using HermesTravel.Data
+@using HermesTravel.Pages
+@using DataAccessHermesTravel
+
+@inject NavigationManager helper
+@inject ISqlDataAccess _data
+@inject IConfiguration _config
+@inject User user
+@inject IJSRuntime JSRuntime
+
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HermesTravel</title>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="HermesTravel.styles.css" rel="stylesheet" />
+
+    <style>
+        .img {
+            border: 2px solid #06263d;
+            border-radius: 10%;
+            background-color: white;
+        }
+
+        .navbar {
+            border-bottom: 2px solid #06263d;
+        }
+
+        .titleText {
+            color: #06263d;
+            font-size: 50px;
+            padding-left: 15px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .exitB {
+            color: black;
+            font-weight: bold;
+            padding: 10px 57px;
+        }
+
+        .exitB:hover {
+            transition: background-color 0.25s;
+            background-color: #b04848;
+            color: black;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 40px;
+            width: 40%;
+            border: 1px solid #06263d;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            background-color: #f9932f;
+        }
+
+        .avatar {
+            height: 240px;
+            width: 240px;
+            border: 2px solid #06263d;
+            border-radius: 5%;
+            margin: 10px 10px 10px;
+        }
+
+        .userInfo {
+            text-overflow: ellipsis;
+            text-align: left;
+            font-size: 30px;
+            margin: auto 0;
+        }
+
+        .userInfo>:nth-of-type(3) {
+            margin: 40px 0 20px;
+        }
+
+        .userInfo>:nth-of-type(4) {
+            margin: 20px 0 10px;
+        }
+
+        .spanF {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 150px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .spanF-big {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 400px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btnTop {
+            width: 275px;
+        }
+
+        hr {
+            background-color: #06263d;
+            border: 0 none;
+            color: #06263d;
+            height: 1px;
+            margin: 20px auto;
+            width: 75%;
+        }
+
+        .littleHR {
+            width: 50%;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        .btn-aux {
+            margin-top: 10px;
+            width: 275px;
+        }
+
+        .infoCol {
+            border: 2px solid #06263d;
+            background-color: #f9932f;
+            border-radius: 5%;
+        }
+
+        .infoCol>p {
+            border-bottom: 2px solid #06263d;
+        }
+
+        .infoCol>p:last-child {
+            border-bottom: none;
+        }
+
+        .pointIMG {
+            height: 240px;
+            width: 400px;
+            border: 2px solid #06263d;
+            border-radius: 5%;
+            margin-left: 100px;
+        }
+
+        .inputClass {
+            margin: 0 auto;
+            width: 400px;
+        }
+
+        @@media (max-width: 767.98px) {
+            .container {
+                max-width: 350px;
+            }
+
+            .avatar {
+                height: 150px;
+                width: 150px;
+            }
+
+            .userInfo {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="Home">
+                <img src="./images/logo.png" width="50" height="75" class="img img-aux d-inline-block align-top" alt="">
+                <span class="titleText fw-bold">HermesTravel</span>
+            </a>
+            <EditForm Model="logout" OnValidSubmit="@deleteUser">
+                <input class="btn btn-primary exitB" type="submit" value="Terminar Sessão" />
+            </EditForm>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row align-items-start">
+            <div class="col-4">
+                <div class="progress position-relative">
+                    <div class="progress-bar progress-bar-striped" role="progressbar"
+                        style="width: @user.calculateLevel().Item2;" aria-valuenow="@user.calculateLevel().Item3"
+                        aria-valuemin="0" aria-valuemax="100"></div>
+                    <span
+                        class="justify-content-center d-flex position-absolute w-100 fs-5">@user.calculateLevel().Item3%</span>
+                </div>
+                <img class="img-fluid avatar" src="@user.imagemURL">
+            </div>
+            <div class="col-4 align-self-center">
+                <div class="userInfo">
+                    <p class="fw-bold mt-2 mb-0">@user.nome</p>
+                    <p class="fs-5">@user.email</p>
+                    <p class="fs-5"><span class="spanF">Nível @user.calculateLevel().Item1</span></p>
+                    <p class="fs-5"><span class="spanF">Amigos @user.getFriends().Count()</span></p>
+                </div>
+            </div>
+            <div class="col-4 align-self-center">
+                <div class="container">
+                    <a class="btn btn-secundary btnTop fw-bold" href="Home">Página inicial</a>
+                    @if (@user.calculateLevel().Item1 >= 10)
+                    {
+                        <a class="btn btn-secundary btnTop fw-bold" href="InterestPoints/New">Sugerir novo ponto</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container buttons">
+        <EditForm Model="interestPoint" OnValidSubmit="@GetPointInformation">
+            <div class="input-group mt-4 inputClass">
+                <InputText @bind-Value="interestPoint" class="form-control" type="text"
+                    placeholder="Insira um ponto de interesse" required>
+                </InputText>
+            </div>
+            <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Obter informações" />
+        </EditForm>
+    </div>
+
+    <hr class="littleHR">
+
+    @if (status >= 1)
+    {
+        <div class="container mt-4">
+            <p class="fs-5"><span class="spanF-big">Informação sobre: @interestPoint</span></p>
+        </div>
+
+        <div class="container">
+            <div class="row align-items-start">
+                <div class="col-5 text-start infoCol">
+                    <p class="fs-6 mt-3"><span class="fw-bold">Cidade: @info[0].Item2</span></p>
+                    <p class="fs-6"><span class="fw-bold">Descrição: @info[0].Item1</span></p>
+                    <p class="fs-6"><span class="fw-bold">Categorias: @categorias</span></p>
+                    <p class="fs-6"><span class="fw-bold">Avaliação: @average</span></p>
+                    <p class="fs-6 mb-0"><span class="fw-bold">Coordenadas: @info[0].Item3</span></p>
+                </div>
+                <div class="col-7">
+                    <img class="img-fluid pointIMG" src="@info[0].Item4">
+                </div>
+            </div>
+        </div>
+
+        @if (status == 1)
+        {
+            <div class="container inputClass">
+                <EditForm Model="inputs" OnValidSubmit="@Evaluate">
+                    <div class="input-group mt-5">
+                        <label for="avaliacao" class="form-label mb-0 fw-bold">Avaliação (0 a 5)</label>
+                        <InputText @bind-Value="inputs.evaluation" class="form-range" type="range" min="0" max="5"
+                    id="avaliacao" required></InputText>
+                        <span class="input-group-text mt-2">Comentário</span>
+                        <textarea class="form-control mt-2" aria-label="Comentário" @bind="inputs.text" required></textarea>
+                    </div>
+                    <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Avaliar ponto" />
+                </EditForm>
+            </div>
+        }
+        else
+        {
+            <div class="container inputClass mt-5">
+                <p class="spanF-big fs-5">Avaliação inserida com sucesso!!</p>
+                <EditForm Model="status" OnValidSubmit="@EvaluateAgain">
+                    <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Nova avaliação" />
+                </EditForm>
+            </div>
+        }
+    }
+
+</body>
+
+</html>
+
+@code
+{
+    public class input
+    {
+        public string evaluation { get; set; }
+        public string text { get; set; }
+    }
+
+    string logout = "";
+    string interestPoint = "";
+    int status = 0;
+    input inputs = new input();
+
+    List<(string, string, string, string)> info = new List<(string, string, string, string)>();
+    List<string> categories = new List<string>();
+    List<string> avaliacao = new List<string>();
+    int total = 0, i = 0;
+    double average = 0;
+    bool exists = false;
+
+    string categorias = "";
+
+    public async void GetPointInformation()
+    {
+        info = new List<(string, string, string, string)>();
+        avaliacao = new List<string>();
+        categories = new List<string>();
+        total = 0; average = 0; i = 0;
+        categorias = "";
+        status = 1;
+        exists = false;
+
+        string sqlA = "SELECT descricao, cidade, coordenadas, imagemURL FROM mydb.pontointeresse WHERE nome=@Nome";
+        info = (await _data.LoadData<(string, string, string, string), dynamic>(sqlA, new { Nome = interestPoint },
+        _config.GetConnectionString("default")));
+
+        if (info.Count > 0)
+        {
+            string sqlC2 = "SELECT CC.descricao FROM mydb.pontointeresse_has_categoria AS C "
+            + "JOIN mydb.pontointeresse AS P ON C.pontointeresse_nome = P.nome "
+            + "JOIN mydb.categoria AS CC ON C.categoria_idcategoria = CC.idcategoria WHERE nome = @Nome";
+            categories = (await _data.LoadData<string, dynamic>(sqlC2, new { Nome = interestPoint },
+            _config.GetConnectionString("default")));
+
+            string sqlB = "SELECT A.avaliacao FROM mydb.avaliacao AS A "
+            + "WHERE A.pontointeresse_nome = @Nome";
+            avaliacao = (await _data.LoadData<string, dynamic>(sqlB, new { Nome = interestPoint },
+            _config.GetConnectionString("default")));
+
+            for (i = 0; i < avaliacao.Count; i++)
+            {
+                total += Int32.Parse(avaliacao[i]);
+            }
+            if (i != 0)
+                average = (float)total / i;
+
+            average = Math.Truncate(100 * average) / 100;
+
+            for (i = 0; i < categories.Count - 1; i++)
+            {
+                categorias = categorias + (categories[i]) + ", ";
+            }
+            if (i != 0)
+                categorias = categorias + (categories[i]);
+        }
+        else
+        {
+            status = 0;
+        }
+    }
+
+    public void EvaluateAgain()
+    {
+        status = 1;
+    }
+
+    public async void Evaluate()
+    {
+        List<string> avaliacao = new List<string>();
+        string sqlB = "SELECT avaliacao FROM mydb.avaliacao";
+        avaliacao = (await _data.LoadData<string, dynamic>(sqlB, new { Nome = interestPoint },
+        _config.GetConnectionString("default")));
+
+        int id = avaliacao.Count() + 1;
+        string sqlA = "INSERT INTO avaliacao (idavaliacao, avaliacao, descricao, pontointeresse_nome, utilizador_email)"
+        + "VALUES (@Id, @Avaliacao, @Descricao, @Nome, @Email)";
+        await _data.SaveData(sqlA, new
+        {
+            ID = id,
+            Avaliacao = inputs.evaluation,
+            Descricao = inputs.text,
+            Nome = interestPoint,
+            Email = user.email
+        }, _config.GetConnectionString("default"));
+
+        user.addXP(15);
+
+        string sql = "UPDATE mydb.utilizador set nivel = @nivel WHERE email = @email";
+        await _data.SaveData(sql, new { nivel = user.nivel, email = user.email }, _config.GetConnectionString("default"));
+        status = 2;
+    }
+
+    private async void deleteUser()
+    {
+        string sqlS = "UPDATE mydb.utilizador SET login = 0 WHERE email=@Email";
+        await _data.SaveData(sqlS, new { Email = user.email }, _config.GetConnectionString("default"));
+        user.deleteUser();
+        helper.NavigateTo("/", true);
+    }
+}

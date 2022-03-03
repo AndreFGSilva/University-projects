@@ -1,0 +1,5 @@
+HermesTravel/obj/*
+.vscode/
+HermesTravel/bin/*
+DataAccessHermesTravel/bin/*
+DataAccessHermesTravel/obj/*

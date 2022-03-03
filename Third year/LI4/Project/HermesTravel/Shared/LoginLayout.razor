@@ -1,0 +1,320 @@
+@page "/Login"
+
+@using HermesTravel.Data
+@using DataAccessHermesTravel
+@using Microsoft.Extensions.Configuration
+@inject NavigationManager helper
+
+@using System.Threading
+
+@inject ISqlDataAccess _data
+@inject IConfiguration _config
+@inject User user
+@inject Admin admin
+
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HermesTravel</title>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="HermesTravel.styles.css" rel="stylesheet" />
+
+    <style>
+        .img {
+            width: 22.5%;
+            margin-top: 100px;
+            border: 2px solid #06263d;
+            border-radius: 10%;
+            background-color: white;
+        }
+
+        .titleText {
+            color: #06263d;
+            font-size: 50px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .container {
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .btn {
+            margin-top: 10px;
+            padding: 5px 40px;
+        }
+
+        .spanF-big {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 400px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        @@media (max-width: 767.98px) {
+            .container {
+                max-width: 350px;
+            }
+        }
+
+        @@media (min-width: 992px) {
+            .img {
+                width: 17.5%;
+            }
+        }
+
+        @@media (min-width: 1400px) {
+            .img {
+                width: 12.5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <img class="img-fluid img img-aux" src="./images/logo.png">
+    <p class="titleText fw-bold">HermesTravel</p>
+
+    @if (status == 1)
+    {
+        <div class="container mt-5">
+            <p class="spanF-big fs-5">Credenciais incorretas!!</p>
+        </div>
+    }
+
+    <div class="container">
+        <EditForm Model="userL" OnValidSubmit="@Login">
+            <div class="form-group">
+                <InputText @bind-Value="userL.email" class="form-control" type="text" id="email" placeholder="Email">
+                </InputText>
+            </div>
+            <div class="form-group">
+                <InputText @bind-Value="userL.password" class="form-control" type="password" id="password"
+                    placeholder="Password"></InputText>
+            </div>
+            <input class="btn btn-secundary fw-bold" href="Home" type="submit" value="Login" />
+        </EditForm>
+    </div>
+
+</body>
+
+</html>
+
+@code {
+
+    User userL = new User();
+    List<User> users = new List<User>();
+    List<string> friends = new List<string>();
+
+    List<InterestPoint> suggestionsPoints = new List<InterestPoint>();
+
+    List<InterestPoint> favouritePoints = new List<InterestPoint>();
+
+    List<Route> routesHistory = new List<Route>();    
+    string res;
+    int status = 0;
+
+    bool flag = false;
+    private async Task Login()
+    {
+        flag = false;
+        string sql = "SELECT * FROM mydb.utilizador WHERE email = @Email";
+        users = await _data.LoadData<User, dynamic>(sql, new {Email = userL.email}, _config.GetConnectionString("default"));
+
+        foreach (var u in users)
+        {
+            if (u.password.Equals(userL.password) && u.login == false)
+            {
+                flag = true;
+                string sqlLogin = "UPDATE mydb.utilizador SET login = 1 WHERE email = @Email";
+                await _data.SaveData(sqlLogin, new {Email = userL.email}, _config.GetConnectionString("default"));
+
+                List<String> userpointsnames = new List<String>(); 
+                string sqlFriends = "SELECT U.utilizador_email1 FROM mydb.utilizador_has_utilizador AS U " 
+                                    + "JOIN mydb.utilizador AS P ON U.utilizador_email = P.email WHERE email = @Email";
+                friends = await _data.LoadData<string, dynamic>(sqlFriends, new {Email = userL.email}, _config.GetConnectionString("default"));
+
+                string sqlFP = "SELECT V.pontointeresse_nome FROM mydb.utilizador_hasfavorite_pontointeresse AS V "
+                                + "JOIN mydb.utilizador AS P ON V.utilizador_email = P.email WHERE email = @Email";
+
+                userpointsnames = await _data.LoadData<String, dynamic>(sqlFP, new {Email = userL.email}, _config.GetConnectionString("default"));
+
+                List<String> sUserpointsnames = new List<String>();     
+                string sqlSP = "SELECT V.pontointeresse_nome FROM mydb.utilizador_hassugestao_pontointeresse AS V "
+                                + "JOIN mydb.utilizador AS P ON V.utilizador_email = P.email WHERE email = @Email";
+
+                sUserpointsnames = await _data.LoadData<String, dynamic>(sqlSP, new {Email = userL.email}, _config.GetConnectionString("default")); 
+
+                List<String> rUserpointsnames = new List<String>();
+                string sqlRP = "SELECT RP.pontointeresse_nome FROM mydb.Rota_has_pontointeresse AS RP "
+                                + "JOIN mydb.rota AS RT "
+                                + "JOIN mydb.utilizador_hashistorico_rota AS R WHERE R.utilizador_email = @Email AND RP.rota_nome = RT.nome AND RT.nome = R.rota_nome";                                   
+                
+                rUserpointsnames = await _data.LoadData<String, dynamic>(sqlRP, new {Email = userL.email}, _config.GetConnectionString("default"));
+
+                createFavouritePoints(userpointsnames, favouritePoints);
+                createSuggestionPoints(sUserpointsnames, suggestionsPoints);
+                createRoutes(rUserpointsnames, routesHistory);
+
+                user.buildUser(friends, favouritePoints, suggestionsPoints, routesHistory, users[0]);
+
+                res = "User válido";
+
+                helper.NavigateTo("Home");
+            }
+            else
+            {
+                res = "Utilizador Inválido";
+                status = 1;
+                helper.NavigateTo("/Login");
+            }
+        }
+
+        if(users.Count == 0){
+            List<(string,string)> adminL = new List<(string,string)>();
+            string sqladmin = "SELECT * FROM mydb.admin WHERE email = @Email AND password = @Password";
+            adminL = await _data.LoadData<(string,string), dynamic>(sqladmin, new {Email = userL.email, Password = userL.password}, _config.GetConnectionString("default"));
+
+            if(adminL.Count == 1){
+                List<InterestPoint> points = new List<InterestPoint>();
+                string sqlpoints = "SELECT * FROM mydb.pontointeresse";
+                points = await _data.LoadData<InterestPoint, dynamic>(sqlpoints, new {}, _config.GetConnectionString("default"));
+                
+                admin.buildAdmin(userL.email, userL.password, points);
+
+                helper.NavigateTo("/Admin");
+            }
+            else
+            {
+                res = "Utilizador Inválido";
+                status = 1;
+                helper.NavigateTo("/Login");
+            }
+        }
+        else
+        {   
+            if(flag = false){
+                res = "Dados invalidos";
+                status = 1;
+                helper.NavigateTo("/Login");
+            }
+        }
+
+    }
+
+    private async void createFavouritePoints(List<string> nomes, List<InterestPoint> favouritepoints){
+        foreach(var n in nomes){
+            List<Category> categories = new List<Category>();
+            List<Evaluation> avaliacao = new List<Evaluation>();
+            List<InterestPoint> interestpoint = new List<InterestPoint>();
+
+            string sqlC2 = "SELECT CC.idcategoria, CC.descricao FROM mydb.pontointeresse_has_categoria AS C "
+                            + "JOIN mydb.pontointeresse AS P ON C.pontointeresse_nome = P.nome "
+                            + "JOIN mydb.categoria AS CC ON C.categoria_idcategoria = CC.idcategoria WHERE nome = @Nome";
+
+            categories = (await _data.LoadData<Category, dynamic>(sqlC2, new {Nome = n}, _config.GetConnectionString("default")));
+
+            string sqlA = "SELECT A.idavaliacao, A.avaliacao, A.descricao FROM mydb.avaliacao AS A "
+                            + "WHERE A.pontointeresse_nome = @Nome";
+            
+            avaliacao = (await _data.LoadData<Evaluation, dynamic>(sqlA, new {Nome = n}, _config.GetConnectionString("default")));
+            
+            string sqlIP = "SELECT V.nome, V.descricao, V.cidade, V.coordenadas FROM mydb.utilizador_hasfavorite_pontointeresse AS F "
+                            + "JOIN mydb.utilizador AS U ON F.utilizador_email = U.email "
+                            + "JOIN mydb.pontointeresse AS V ON F.pontointeresse_nome = V.nome WHERE email = @Email AND V.nome = @Nome";
+
+            interestpoint = await _data.LoadData<InterestPoint, dynamic>(sqlIP, new {Email = userL.email, Nome = n}, _config.GetConnectionString("default"));
+
+            favouritePoints.Add(interestpoint[0].buildInterestPoint(avaliacao, categories,interestpoint[0]));
+        }
+    }
+
+    private async void createSuggestionPoints(List<string> nomes, List<InterestPoint> suggestionpoints){
+        foreach(var n in nomes){
+            List<Category> categories = new List<Category>();
+            List<Evaluation> avaliacao = new List<Evaluation>();
+            List<InterestPoint> interestpoint = new List<InterestPoint>();
+
+            string sqlC2 = "SELECT CC.idcategoria, CC.descricao FROM mydb.pontointeresse_has_categoria AS C "
+                            + "JOIN mydb.pontointeresse AS P ON C.pontointeresse_nome = P.nome "
+                            + "JOIN mydb.categoria AS CC ON C.categoria_idcategoria = CC.idcategoria WHERE nome = @Nome";
+
+            categories = (await _data.LoadData<Category, dynamic>(sqlC2, new {Nome = n}, _config.GetConnectionString("default")));
+
+            string sqlA = "SELECT A.idavaliacao, A.avaliacao, A.descricao FROM mydb.avaliacao AS A "
+                            + "WHERE A.pontointeresse_nome = @Nome";
+            
+            avaliacao = (await _data.LoadData<Evaluation, dynamic>(sqlA, new {Nome = n}, _config.GetConnectionString("default")));
+            
+            string sqlIP = "SELECT V.nome, V.descricao, V.cidade, V.coordenadas FROM mydb.utilizador_hassugestao_pontointeresse AS F "
+                            + "JOIN mydb.utilizador AS U ON F.utilizador_email = U.email "
+                            + "JOIN mydb.pontointeresse AS V ON F.pontointeresse_nome = V.nome WHERE email = @Email AND V.nome = @Nome";
+
+            interestpoint = await _data.LoadData<InterestPoint, dynamic>(sqlIP, new {Email = userL.email, Nome = n}, _config.GetConnectionString("default"));
+
+            suggestionpoints.Add(interestpoint[0].buildInterestPoint(avaliacao, categories,interestpoint[0]));
+        }
+    }
+
+    private async void createRoutes(List<string> nomes, List<Route> routes){
+        List<string> routenames = new List<string>();
+        string sqlRT = "SELECT R.Rota_nome FROM Utilizador_hashistorico_rota AS R " +
+                        "WHERE R.Utilizador_email = @Email";
+        
+        routenames = await _data.LoadData<string, dynamic>(sqlRT, new {Email = userL.email}, _config.GetConnectionString("default")); 
+        
+        foreach (var r in routenames)
+        {   
+            List<InterestPoint> routepoints = new List<InterestPoint>();
+            foreach(var n in nomes){
+                List<Category> categories = new List<Category>();
+                List<Evaluation> avaliacao = new List<Evaluation>();
+                List<InterestPoint> interestpoint = new List<InterestPoint>();
+
+                string sqlC2 = "SELECT CC.idcategoria, CC.descricao FROM mydb.pontointeresse_has_categoria AS C "
+                                + "JOIN mydb.pontointeresse AS P ON C.pontointeresse_nome = P.nome "
+                                + "JOIN mydb.categoria AS CC ON C.categoria_idcategoria = CC.idcategoria WHERE nome = @Nome";
+
+                categories = await _data.LoadData<Category, dynamic>(sqlC2, new {Nome = n}, _config.GetConnectionString("default"));
+
+                string sqlA = "SELECT A.idavaliacao, A.avaliacao, A.descricao FROM mydb.avaliacao AS A "
+                                + "WHERE A.pontointeresse_nome = @Nome";
+                
+                avaliacao = await _data.LoadData<Evaluation, dynamic>(sqlA, new {Nome = n}, _config.GetConnectionString("default"));
+                
+                string sqlIP = "SELECT V.nome, V.descricao, V.cidade, V.coordenadas FROM mydb.rota_has_pontointeresse AS F "
+                                + "JOIN mydb.rota AS R ON F.Rota_nome = R.nome "
+                                + "JOIN mydb.pontointeresse AS V ON F.pontointeresse_nome = V.nome WHERE R.nome = @RNome AND V.nome = @Nome";
+
+                interestpoint = await _data.LoadData<InterestPoint, dynamic>(sqlIP, new {RNome = r, Nome = n}, _config.GetConnectionString("default"));
+                if(interestpoint.Count > 0 && containsNome(routepoints, interestpoint[0].nome))
+                    routepoints.Add(interestpoint[0].buildInterestPoint(avaliacao, categories,interestpoint[0]));
+            }
+            Route rt = new Route(r, routepoints);
+            routes.Add(rt);
+        }    
+    }
+
+    public bool containsNome(List<InterestPoint> route, string nome){
+        foreach(var i in route){
+            if (i.nome.Equals(nome)){
+                return false;
+            }
+        }
+        return true;
+    }
+}

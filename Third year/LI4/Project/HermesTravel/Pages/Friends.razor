@@ -1,0 +1,280 @@
+@page "/Account/Friends"
+
+@using HermesTravel.Data
+@using HermesTravel.Pages
+@using DataAccessHermesTravel
+
+@inject ISqlDataAccess _data
+@inject IConfiguration _config
+@inject User user
+@inject NavigationManager helper
+
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HermesTravel</title>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="HermesTravel.styles.css" rel="stylesheet" />
+
+    <style>
+        .img {
+            border: 2px solid #06263d;
+            border-radius: 10%;
+            background-color: white;
+        }
+
+        .navbar {
+            border-bottom: 2px solid #06263d;
+        }
+
+        .titleText {
+            color: #06263d;
+            font-size: 50px;
+            padding-left: 15px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .exitB {
+            color: black;
+            font-weight: bold;
+            padding: 10px 57px;
+        }
+
+        .exitB:hover {
+            transition: background-color 0.25s;
+            background-color: #b04848;
+            color: black;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 40px;
+            width: 40%;
+            border: 1px solid #06263d;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            background-color: #f9932f;
+        }
+
+        .avatar {
+            height: 240px;
+            width: 240px;
+            border: 2px solid #06263d;
+            border-radius: 5%;
+            margin: 10px 10px 10px;
+        }
+
+        .userInfo {
+            text-overflow: ellipsis;
+            text-align: left;
+            font-size: 30px;
+            margin: auto 0;
+        }
+
+        .userInfo>:nth-of-type(3) {
+            margin: 40px 0 20px;
+        }
+
+        .userInfo>:nth-of-type(4) {
+            margin: 20px 0 10px;
+        }
+
+        .spanF {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 150px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        hr {
+            background-color: #06263d;
+            border: 0 none;
+            color: #06263d;
+            height: 1px;
+            margin: 20px auto;
+            width: 75%;
+        }
+
+        .buttons {
+            margin-top: 90px;
+        }
+
+        .searchCol {
+            margin-bottom: 25px;
+            width: 400px;
+        }
+
+        .btn-aux {
+            margin-top: 10px;
+            padding: 5px 30px;
+        }
+
+        .friends {
+            margin-left: 125px;
+        }
+
+        .vertical-scrollable>.row {
+            position: absolute;
+            width: 700px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        .col-sm-8 {
+            border: 2px solid #06263d;
+            margin-left: 225px;
+            padding: 5px 15px 0 15px;
+            font-size: 20px;
+        }
+
+        @@media (max-width: 767.98px) {
+            .container {
+                max-width: 350px;
+            }
+
+            .avatar {
+                height: 150px;
+                width: 150px;
+            }
+
+            .userInfo {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="Home">
+                <img src="./images/logo.png" width="50" height="75" class="img img-aux d-inline-block align-top" alt="">
+                <span class="titleText fw-bold">HermesTravel</span>
+            </a>
+            <EditForm Model="logout" OnValidSubmit="@deleteUser">
+                    <input class="btn btn-primary exitB" type="submit" value="Terminar Sessão"/>
+            </EditForm>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row align-items-start">
+            <div class="col-4">
+                <div class="progress position-relative">
+                    <div class="progress-bar progress-bar-striped" role="progressbar"
+                        style="width: @user.calculateLevel().Item2;" aria-valuenow="@user.calculateLevel().Item3"
+                        aria-valuemin="0" aria-valuemax="100"></div>
+                    <span
+                        class="justify-content-center d-flex position-absolute w-100 fs-5">@user.calculateLevel().Item3%</span>
+                </div>
+                <img class="img-fluid avatar" src="@user.imagemURL">
+            </div>
+            <div class="col-4 align-self-center">
+                <div class="userInfo">
+                    <p class="fw-bold mt-2 mb-0">@user.nome</p>
+                    <p class="fs-5">@user.email</p>
+                    <p class="fs-5"><span class="spanF">Nível @user.calculateLevel().Item1</span></p>
+                    <p class="fs-5"><span class="spanF">Amigos @user.getFriends().Count()</span></p>
+                </div>
+            </div>
+            <div class="col-4 align-self-center">
+                <div class="container">
+                    <a class="btn btn-secundary fw-bold" href="Account">Voltar ao perfil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row buttons">
+            <div class="col-6 searchCol">
+                <EditForm Model="userfriend" OnValidSubmit="@AddFriend">
+                    <div class="input-group">
+                        <InputText @bind-Value="userfriend.inputA" class="form-control" type="text" placeholder="Insira um username" required></InputText>
+                    </div>
+                    <input class="btn btn-secundary btn-aux fw-bold" href="Account/Friends" type="submit" value="Adicionar amigo"/>
+                </EditForm>
+                <EditForm Model="userfriend" OnValidSubmit="@RemoveFriend">
+                    <div class="input-group mt-5">
+                        <InputText @bind-Value="userfriend.inputB" class="form-control" type="text" placeholder="Insira um username" required></InputText>
+                        </div>
+                        <input class="btn btn-secundary btn-aux fw-bold" href="Account/Friends" type="submit" value="Remover amigo"/>
+                </EditForm>
+            </div>
+            <div class="col-6 friends">
+                <div class="container vertical-scrollable" tabindex="0"> 
+                    <div class="row text-start">
+                        @for (int i = 0; i < user.getFriends().Count(); i++) {
+                            <div class="col-sm-8">@user.getFriends()[i]</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
+
+@code {
+    public class userFriend
+    {
+        public string inputA { get; set; }
+        public string inputB { get; set; }
+    }
+
+    int status = 0;
+    string logout = "";
+    userFriend userfriend = new userFriend();
+    private async void AddFriend()
+    {
+        string sqlExists = "SELECT utilizador_email FROM mydb.utilizador_has_utilizador WHERE utilizador_email = @Email AND utilizador_email1 = @Email2 ";
+        List<string> friends = await _data.LoadData<string, dynamic>(sqlExists, new {Email = user.email, Email2 = userfriend.inputA}, _config.GetConnectionString("default"));
+        if (friends.Count < 1) 
+        {
+            user.addFriend(userfriend.inputA);
+            string sqlAdd = "INSERT INTO mydb.utilizador_has_utilizador (utilizador_email, utilizador_email1) "
+                            + "VALUES (@utilizador_email, @utilizador_email1)";
+            await _data.SaveData(sqlAdd, new {utilizador_email = user.email, utilizador_email1 = userfriend.inputA}, _config.GetConnectionString("default"));     
+            user.addXP(5);
+
+            string sql = "UPDATE mydb.utilizador set nivel = @nivel WHERE email = @email";
+            await _data.SaveData(sql, new {nivel = user.nivel, email = user.email}, _config.GetConnectionString("default"));    
+        }
+    }
+
+    private async void RemoveFriend()
+    {
+        string sqlExists = "SELECT utilizador_email1 FROM mydb.utilizador_has_utilizador WHERE utilizador_email = @myemail AND utilizador_email1 = @friendemail";
+        List<string> friends = await _data.LoadData<string, dynamic>(sqlExists, new {friendemail = userfriend.inputB, myemail = user.email}, _config.GetConnectionString("default"));
+        if (friends.Count > 0)
+        {
+            user.deleteFriend(userfriend.inputB);
+            string sqlDelete = "DELETE FROM mydb.utilizador_has_utilizador WHERE Utilizador_email = @myemail AND Utilizador_email1 = @friendemail";
+            await _data.SaveData(sqlDelete, new {friendemail = userfriend.inputB, myemail = user.email}, _config.GetConnectionString("default"));
+        }
+    }
+
+    private async void deleteUser()
+    {   
+        string sqlS = "UPDATE mydb.utilizador SET login = 0 WHERE email=@Email";
+        await _data.SaveData(sqlS, new { Email = user.email }, _config.GetConnectionString("default"));
+        user.deleteUser();
+        helper.NavigateTo("/", true);
+    }
+}

@@ -1,0 +1,496 @@
+@page "/Admin"
+
+@using HermesTravel.Data
+@using HermesTravel.Pages
+@using DataAccessHermesTravel
+@inject ISqlDataAccess _data
+@inject IConfiguration _config
+@inject Admin admin
+@inject NavigationManager helper
+
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HermesTravel</title>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="HermesTravel.styles.css" rel="stylesheet" />
+
+    <style>
+        .img {
+            border: 2px solid #06263d;
+            border-radius: 10%;
+            background-color: white;
+        }
+
+        .navbar {
+            border-bottom: 2px solid #06263d;
+        }
+
+        .titleText {
+            color: #06263d;
+            font-size: 50px;
+            padding-left: 15px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .exitB {
+            color: black;
+            font-weight: bold;
+            padding: 10px 57px;
+        }
+
+        .exitB:hover {
+            transition: background-color 0.25s;
+            background-color: #b04848;
+            color: black;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 40px;
+            width: 40%;
+            border: 1px solid #06263d;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            background-color: #f9932f;
+        }
+
+        .avatar {
+            height: 240px;
+            width: 240px;
+            border: 2px solid #06263d;
+            border-radius: 5%;
+            margin: 10px auto 10px;
+        }
+
+        .userInfo {
+            font-size: 30px;
+            margin: 0 auto;
+        }
+
+        .searchCol {
+            margin-top: 100px;
+            width: 400px;
+        }
+
+        .spanF {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 150px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .spanF-big {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 395px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .spanF-big-top {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 250px;
+            line-height: 100px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        hr {
+            background-color: #06263d;
+            border: 0 none;
+            color: #06263d;
+            height: 1px;
+            margin: 20px auto;
+            width: 75%;
+        }
+
+        .littleHR {
+            width: 50%;
+            margin-top: 130px;
+        }
+
+        .buttons {
+            margin-top: 25px;
+        }
+
+        .btn-aux {
+            width: 320px;
+        }
+
+        .infoCol {
+            border: 2px solid #06263d;
+            background-color: #f9932f;
+            border-radius: 5%;
+        }
+
+        .infoCol>p {
+            border-bottom: 2px solid #06263d;
+        }
+
+        .infoCol>p:last-child {
+            border-bottom: none;
+        }
+
+        .pointIMG {
+            height: 240px;
+            width: 400px;
+            border: 2px solid #06263d;
+            border-radius: 5%;
+            margin-left: 100px;
+        }
+
+        .friends {
+            margin-top: 50px;
+            margin-left: 125px;
+        }
+
+        .vertical-scrollable>.row {
+            position: absolute;
+            width: 700px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        .col-sm-8 {
+            border: 2px solid #06263d;
+            margin-left: 225px;
+            padding: 5px 15px 0 15px;
+            font-size: 20px;
+        }
+
+        @@media (max-width: 767.98px) {
+            .container {
+                max-width: 350px;
+            }
+
+            .avatar {
+                height: 150px;
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="Home">
+                <img src="./images/logo.png" width="50" height="75" class="img img-aux d-inline-block align-top" alt="">
+                <span class="titleText fw-bold">HermesTravel</span>
+            </a>
+            <EditForm Model="logout" OnValidSubmit="@deleteAdmin">
+                <input class="btn btn-primary exitB" type="submit" value="Terminar Sessão" />
+            </EditForm>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="userInfo">
+            <p class="fw-bold fs-2 spanF-big-top">ADMIN</p>
+            <p class="fw-bold mt-1">@admin.email</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="mt-4">
+            <p class="spanF-big fs-5">Sugestão de pontos</p>
+        </div>
+    </div>
+
+    <div class="container">
+        @if (status <= 3)
+        {
+            <div class="row">
+                <div class="col-6 searchCol">
+                    @if (status == 1)
+                    {
+                        <div class="mt-0">
+                            <p class="spanF-big fs-5">Ponto sugerido não existe!! Insira outro.</p>
+                        </div>
+                    }
+                    <EditForm Model="interestpointI" OnValidSubmit="getInterestPoint">
+                        <div class="input-group mt-4">
+                            <InputText @bind-Value="interestpointI.inputA" class="form-control" type="text"
+                            placeholder="Insira o nome de um ponto sugerido" required>
+                            </InputText>
+                        </div>
+                        <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Obter ponto" />
+                    </EditForm>
+                </div>
+                <div class="col-6 friends">
+                    <div class="container vertical-scrollable" tabindex="0">
+                        <div class="row text-start">
+                            @{
+                                callingCreateSuggestionsPoints();
+                                foreach (var c in suggestions)
+                                {
+                                    <div class="col-sm-8">@c.cidade - @c.nome</div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row mt-5">
+                <div class="col-5 text-start infoCol">
+                    <p class="fs-6 mt-3"><span class="fw-bold">Nome: @ponto.nome</span></p>
+                    <p class="fs-6"><span class="fw-bold">Cidade: @ponto.cidade</span></p>
+                    <p class="fs-6"><span class="fw-bold">Descrição: @ponto.descricao</span></p>
+                    <p class="fs-6"><span class="fw-bold">Categorias: @categorias</span></p>
+                    <p class="fs-6 mb-0"><span class="fw-bold">Coordenadas: @ponto.coordenadas</span></p>
+                </div>
+                <div class="col-7">
+                    <img class="img-fluid pointIMG" src="@ponto.imagemURL">
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-6 mt-4">
+                    <EditForm Model="status" OnValidSubmit="@AcceptSuggestion">
+                        <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Aceitar sugestão" />
+                    </EditForm>
+                </div>
+                <div class="col-6 mt-4">
+                    <EditForm Model="status" OnValidSubmit="@RejectSuggestion">
+                        <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Rejeitar sugestão" />
+                    </EditForm>
+                </div>
+            </div>
+        }
+    </div>
+
+    <hr class="littleHR">
+
+    <div class="container">
+        <div class="mt-4">
+            <p class="spanF-big fs-5">Remoção de pontos</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-6 searchCol">
+                @if (status == 2)
+                {
+                    <div class="mt-0">
+                        <p class="spanF-big fs-5">Ponto removido com sucesso!!</p>
+                        <EditForm Model="status" OnValidSubmit="@RemoveAgain">
+                            <input class="btn btn-secundary btn-aux fw-bold mt-4" type="submit"
+                            value="Remover outro ponto" />
+                        </EditForm>
+                    </div>
+                }
+                else 
+                {
+                    if (status == 3)
+                    {
+                        <div class="mt-4">
+                            <p class="spanF-big fs-5">Ponto não existe!! Insira outro.</p>
+                        </div>
+                    }
+                    <EditForm Model="interestpointI" OnValidSubmit="RemovePoint">
+                        <div class="input-group mt-4">
+                            <InputText @bind-Value="interestpointI.inputB" class="form-control" type="text"
+                            placeholder="Insira o nome de um ponto" required>
+                            </InputText>
+                        </div>
+                        <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Remover ponto" />
+                    </EditForm>
+                }
+            </div>
+            <div class="col-6 friends">
+                <div class="container vertical-scrollable" tabindex="0">
+                    <div class="row text-start">
+                        @{
+                            callingCreateInterestPoints();
+                            foreach (var c in interestpoints)
+                            {
+                                <div class="col-sm-8">@c.cidade - @c.nome</div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+@code {
+    public class interestPointInput
+    {
+        public string inputA { get; set; }
+        public string inputB { get; set; }
+    }
+
+    interestPointInput interestpointI = new interestPointInput();
+
+    string logout = "";
+
+    string categorias = "";
+    int status = 0;
+
+    List<InterestPoint> suggestions = new List<InterestPoint>();
+
+    InterestPoint ponto = new InterestPoint();
+
+    List<InterestPoint> interestpoints = new List<InterestPoint>();
+
+    private async void getInterestPoint()
+    {   
+        if(admin.hasPoint(interestpointI.inputA) && admin.isPontoNaoValido(interestpointI.inputA)){
+            // SE OBTEVE PONTO CORRETO (status = 4)
+            int i = 0;
+            ponto = new InterestPoint();
+            ponto = admin.getPonto(interestpointI.inputA);
+            if(ponto.nome != ""){
+                status = 4;
+                for (i = 0; i < ponto.categories.Count - 1; i++)
+                {
+                    categorias = categorias + (ponto.categories[i]) + ", ";
+                }
+                if (i != 0)
+                    categorias = categorias + (ponto.categories[i]);
+            }
+            else{
+                status = 1;
+            }
+        }
+        else{
+        // SE PONTO INTRODUZIDO NÃO EXISTE (status = 1)
+        status = 1;
+        }
+        helper.NavigateTo("Admin");
+    }
+
+    private bool callingCreateSuggestionsPoints()
+    {
+        createSuggestionsPoints();
+        return true;
+    }
+
+    private void createSuggestionsPoints() // ALTERAR PARA TABELA COM SUGESTÕES
+    {
+        suggestions = new List<InterestPoint>();
+        foreach (var p in admin.interestPoints){
+            if(p.valido == 0){
+                suggestions.Add(p);
+            }
+        }
+    }
+
+    private bool callingCreateInterestPoints()
+    {
+        createInterestPoints();
+        return true;
+    }
+
+    private async void createInterestPoints()
+    {
+        interestpoints = new List<InterestPoint>();
+        foreach (var p in admin.interestPoints){
+            if(p.valido == 1){
+                interestpoints.Add(p);
+            }
+        }
+    }
+
+    private async void RejectSuggestion() // REJEITAR PONTO DE INTERESSE
+    {   
+        string sql = "DELETE FROM mydb.utilizador_hassugestao_pontointeresse WHERE pontointeresse_nome = @Nome";
+        await _data.SaveData(sql, new {Nome = interestpointI.inputA}, _config.GetConnectionString("default"));
+
+        string sqlB = "DELETE FROM mydb.pontointeresse_has_categoria WHERE pontointeresse_nome = @Nome";
+        await _data.SaveData(sqlB, new {Nome = interestpointI.inputA}, _config.GetConnectionString("default"));
+
+        string sqlA = "DELETE FROM mydb.pontointeresse WHERE nome = @Nome";
+        await _data.SaveData(sqlA, new {Nome = interestpointI.inputA}, _config.GetConnectionString("default"));
+
+        admin.removePoint(interestpointI.inputA);
+
+        status = 0;
+        helper.NavigateTo("Admin");
+    }
+
+    private async void AcceptSuggestion() // ADICIONAR PONTO DE INTERESSE
+    {
+        List<(string,string)> cat = new List<(string,string)>();
+
+        string sql = "DELETE FROM mydb.utilizador_hassugestao_pontointeresse WHERE pontointeresse_nome = @Nome";
+        await _data.SaveData(sql, new {Nome = interestpointI.inputA}, _config.GetConnectionString("default"));
+
+        string sqlA = "UPDATE mydb.pontointeresse SET valido = 1 WHERE nome = @Nome";
+        await _data.SaveData(sqlA, new {Nome = interestpointI.inputA}, _config.GetConnectionString("default"));
+
+        admin.acceptPoint(interestpointI.inputA);
+
+        status = 0;
+        helper.NavigateTo("Admin");
+    }
+
+    private void RemoveAgain()
+    {
+        status = 0;
+        helper.NavigateTo("Admin");
+    }
+
+    private async void RemovePoint()
+    {
+        // SE PONTO INSERIDO TIVER SIDO REMOVIDO COM SUCESSO (status = 2)
+        if(admin.hasPoint(interestpointI.inputB)){
+            status = 2;
+
+            string sqlB = "DELETE FROM mydb.pontointeresse_has_categoria WHERE pontointeresse_nome = @Nome";
+            await _data.SaveData(sqlB, new {Nome = interestpointI.inputB}, _config.GetConnectionString("default"));
+
+            string sqlC = "DELETE FROM mydb.rota_has_pontointeresse WHERE pontointeresse_nome = @Nome";
+            await _data.SaveData(sqlC, new {Nome = interestpointI.inputB}, _config.GetConnectionString("default"));
+
+            string sqlD = "DELETE FROM mydb.avaliacao WHERE pontointeresse_nome = @Nome";
+            await _data.SaveData(sqlD, new {Nome = interestpointI.inputB}, _config.GetConnectionString("default"));
+
+            string sqlE = "DELETE FROM mydb.utilizador_hasfavorite_pontointeresse WHERE pontointeresse_nome = @Nome";
+            await _data.SaveData(sqlE, new {Nome = interestpointI.inputB}, _config.GetConnectionString("default"));
+
+            string sqlA = "DELETE FROM mydb.pontointeresse WHERE nome = @Nome";
+            await _data.SaveData(sqlA, new {Nome = interestpointI.inputB}, _config.GetConnectionString("default"));
+
+
+            admin.removePoint(interestpointI.inputB);
+        }
+        else{   // SE PONTO INSERIDO FOR INVÁLIDO (status = 3)
+            status = 3;
+        }
+        helper.NavigateTo("Admin");
+    }
+
+    private void deleteAdmin()
+    {
+        admin.deleteAdmin();
+        helper.NavigateTo("/", true);
+    }
+}

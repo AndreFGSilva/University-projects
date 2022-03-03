@@ -1,0 +1,181 @@
+@page "/Register"
+
+@using HermesTravel.Data
+@using DataAccessHermesTravel
+@using Microsoft.Extensions.Configuration
+@inject ISqlDataAccess _data
+@inject IConfiguration _config
+@inject NavigationManager helper
+@inject User user
+
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HermesTravel</title>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="HermesTravel.styles.css" rel="stylesheet" />
+
+    <style>
+        .img {
+            width: 22.5%;
+            margin-top: 100px;
+            border: 2px solid #06263d;
+            border-radius: 10%;
+            background-color: white;
+        }
+
+        .titleText {
+            color: #06263d;
+            font-size: 50px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .container {
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .spanF-big {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 400px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn {
+            margin-top: 10px;
+            padding: 5px 40px;
+        }
+
+        .btn-aux {
+            margin-top: 10px;
+            width: 275px;
+        }
+
+        .check-box {
+            text-align: left;
+        }
+
+        .form-text {
+            color: black;
+        }
+
+        @@media (max-width: 767.98px) {
+            .container {
+                max-width: 350px;
+            }
+        }
+
+        @@media (min-width: 992px) {
+            .img {
+                width: 17.5%;
+            }
+        }
+
+        @@media (min-width: 1400px) {
+            .img {
+                width: 12.5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <img class="img-fluid img img-aux" src="./images/logo.png">
+    <p class="titleText fw-bold">HermesTravel</p>
+
+    @if (status == 0)
+    {
+        <div class="container">
+            <EditForm Model="userL" OnValidSubmit="@RegisterUser">
+                <div class="form-group">
+                    <InputText @bind-Value="userL.nome" class="form-control" type="text" id="name" placeholder="Nome" required></InputText>
+                </div>
+                <div class="form-group">
+                    <InputText @bind-Value="userL.email" class="form-control" type="text" id="email" placeholder="Email" required></InputText>
+                </div>
+                <div class="form-group">
+                    <InputText @bind-Value="userL.password" class="form-control" type="password" id="password" placeholder="Password (mínimo seis caracteres)" required></InputText>
+                </div>
+                <div class="form-check check-box">
+                    <input type="checkbox" class="form-check-input" id="TermsConditions" required>
+                    <label class="form-check-label fw-bold" for="TermsConditions">Li e aceito os termos e condições</label>
+                </div>
+                <input class="btn btn-secundary fw-bold" href="Register" type="submit" value="Registar" />
+            </EditForm>
+        </div>
+    }
+    else
+    {
+        if (status == -1)
+        {
+        <div class="container">
+            <p class="spanF-big fs-5">Email já existe!!</p>
+        </div>
+        }
+        else if (status == -2)
+        {
+            <div class="container">
+                <p class="spanF-big fs-5">Email inválido (abc@email.com)!!</p>
+            </div>
+        }
+        else if (status == -3)
+        {
+            <div class="container">
+                <p class="spanF-big fs-5">Palavra passe inválida (mínimo seis caracteres)!!</p>
+            </div>
+        }
+        <EditForm Model="status" OnValidSubmit="@RegisterAgain">
+            <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Novo registo" />
+        </EditForm>
+    }
+</body>
+
+</html>
+
+@code 
+{
+    int status = 0;
+    User userL = new User();
+
+    public void RegisterAgain()
+    {
+        status = 0;
+    }
+
+    private async Task RegisterUser()
+    {    
+        List<String> emailList = new List<String>();
+        User user = new User(userL.email, userL.password, userL.nome, "", 0, false);
+        string  sql2 = "SELECT email FROM mydb.utilizador WHERE email = @Email";
+        emailList = await _data.LoadData<String, dynamic>(sql2, new { Email = user.email }, _config.GetConnectionString("default"));
+        if(emailList.Count > 0){
+            status = -1;
+        }
+        else if(!userL.email.Contains('@')){
+            status = -2;
+        }
+        else if(userL.password.Length < 6){
+            status = -3;
+        }
+        else{
+            string sql = "INSERT INTO utilizador (Email, Nome, Password, Nivel, Login) VALUES (@Email, @Nome, @Password, @Nivel, @Login);";
+            await _data.SaveData(sql, new { Email = user.email, Nome = user.nome, Password = user.password, Nivel = user.nivel, Login = user.login}, _config.GetConnectionString("default"));
+            helper.NavigateTo("/", true);
+        }
+    }
+}

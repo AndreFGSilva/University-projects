@@ -1,0 +1,73 @@
+﻿@page "/"
+
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HermesTravel</title>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="HermesTravel.styles.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background-color: #a6a6a6;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img {
+            width: 22.5%;
+            margin-top: 100px;
+            border: 2px solid #06263d;
+            border-radius: 10%;
+            background-color: white;
+        }
+
+        .btn-aux {
+            padding: 15px 49px;
+        }
+
+        .titleText {
+            color: #06263d;
+            font-size: 50px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .icon {
+            padding-right: 15px;
+        }
+
+        @@media (min-width: 992px) {
+            .img {
+                width: 17.5%;
+            }
+        }
+
+        @@media (min-width: 1400px) {
+            .img {
+                width: 12.5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <img class="img-fluid img img-aux" src="./images/logo.png">
+    <p class="titleText fw-bold">HermesTravel</p>
+    <div>
+        <a class="btn btn-secundary fw-bold" href="Login"><span><i class="fa fa-user icon" aria-hidden="true"></i></span>Iniciar Sessão</a>
+        <p><a class="btn btn-secundary btn-aux fw-bold" href="Register"><span><i class="fa fa-user-plus icon" aria-hidden="true"></i></span>Registo</a></p>
+    </div>
+</body>
+
+</html>

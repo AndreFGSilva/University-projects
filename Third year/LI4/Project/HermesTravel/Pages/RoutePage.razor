@@ -1,0 +1,541 @@
+@page "/Route"
+
+@using HermesTravel.Data
+@using HermesTravel.Pages
+@using DataAccessHermesTravel
+@using System.Text.Json
+
+@inject NavigationManager helper
+@inject ISqlDataAccess _data
+@inject IConfiguration _config
+@inject User user
+@inject IJSRuntime JSRuntime
+
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HermesTravel</title>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="HermesTravel.styles.css" rel="stylesheet" />
+
+    <style>
+        .img {
+            border: 2px solid #06263d;
+            border-radius: 10%;
+            background-color: white;
+        }
+
+        .navbar {
+            border-bottom: 2px solid #06263d;
+        }
+
+        .titleText {
+            color: #06263d;
+            font-size: 50px;
+            padding-left: 15px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .exitB {
+            color: black;
+            font-weight: bold;
+            padding: 10px 57px;
+        }
+
+        .exitB:hover {
+            transition: background-color 0.25s;
+            background-color: #b04848;
+            color: black;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 40px;
+            width: 40%;
+            border: 1px solid #06263d;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            background-color: #f9932f;
+        }
+
+        .avatar {
+            height: 240px;
+            width: 240px;
+            border: 2px solid #06263d;
+            border-radius: 5%;
+            margin: 10px 10px 10px;
+        }
+
+        .userInfo {
+            text-overflow: ellipsis;
+            text-align: left;
+            font-size: 30px;
+            margin: auto 0;
+        }
+
+        .userInfo>:nth-of-type(3) {
+            margin: 40px 0 20px;
+        }
+
+        .userInfo>:nth-of-type(4) {
+            margin: 20px 0 10px;
+        }
+
+        .spanF {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 150px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .spanF-big {
+            background-color: #f9932f;
+            border: 3px solid #06263d;
+            border-radius: 10%;
+            width: 370px;
+            line-height: 40px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btnTop {
+            width: 280px;
+        }
+
+        hr {
+            background-color: #06263d;
+            border: 0 none;
+            color: #06263d;
+            height: 1px;
+            margin: 20px auto;
+            width: 75%;
+        }
+
+        .searchCol {
+            margin-bottom: 25px;
+            width: 400px;
+        }
+
+        .btn-aux {
+            margin-top: 10px;
+            width: 275px;
+        }
+
+        .AddButtonClass {
+            margin: 0 0;
+            padding: 5px 5px;
+        }
+
+        .friends {
+            margin-top: 25px;
+            margin-left: 125px;
+        }
+
+        .specialP {
+            margin-left: 255px;
+        }
+
+        .horizontal-scrollable {
+            margin-top: 25px;
+        }
+
+        .horizontal-scrollable>.row {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .horizontal-scrollable>.row>.col-4 {
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .vertical-scrollable>.row {
+            position: absolute;
+            width: 700px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        .col-sm-8 {
+            border: 2px solid #06263d;
+            margin-left: 225px;
+            padding: 5px 15px 0 15px;
+            font-size: 20px;
+        }
+
+        @@media (max-width: 767.98px) {
+            .container {
+                max-width: 350px;
+            }
+
+            .avatar {
+                height: 150px;
+                width: 150px;
+            }
+
+            .userInfo {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="Home">
+                <img src="./images/logo.png" width="50" height="75" class="img img-aux d-inline-block align-top" alt="">
+                <span class="titleText fw-bold">HermesTravel</span>
+            </a>
+            <EditForm Model="logout" OnValidSubmit="@deleteUser">
+                <input class="btn btn-primary exitB" type="submit" value="Terminar Sessão" />
+            </EditForm>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row align-items-start">
+            <div class="col-4">
+                <div class="progress position-relative">
+                    <div class="progress-bar progress-bar-striped" role="progressbar"
+                        style="width: @user.calculateLevel().Item2;" aria-valuenow="@user.calculateLevel().Item3"
+                        aria-valuemin="0" aria-valuemax="100"></div>
+                    <span
+                        class="justify-content-center d-flex position-absolute w-100 fs-5">@user.calculateLevel().Item3%</span>
+                </div>
+                <img class="img-fluid avatar" src="@user.imagemURL">
+            </div>
+            <div class="col-4 align-self-center">
+                <div class="userInfo">
+                    <p class="fw-bold mt-2 mb-0">@user.nome</p>
+                    <p class="fs-5">@user.email</p>
+                    <p class="fs-5"><span class="spanF">Nível @user.calculateLevel().Item1</span></p>
+                    <p class="fs-5"><span class="spanF">Amigos @user.getFriends().Count()</span></p>
+                </div>
+            </div>
+            <div class="col-4 align-self-center">
+                <div class="container">
+                    <a class="btn btn-secundary btnTop fw-bold" href="Home">Página inicial</a>
+                    <p class="mb-0"><a class="btn btn-secundary btnTop fw-bold" href="Route/Historic">Histórico de rotas</a></p>
+                    <p><a class="btn btn-secundary btnTop fw-bold" href="Route/FriendsHistory">Histórico de amigos</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-6 searchCol">
+                @if (status <= 1)
+                {
+                    if (status == 1)
+                    {
+                        <div class="mt-4">
+                            <p class="spanF-big fs-5">Nome da rota já existe!! Insira outro.</p>
+                        </div>
+                    }
+                    <EditForm Model="routeName" OnValidSubmit="StartBuildRoute">
+                        <div class="input-group mt-4">
+                            <InputText @bind-Value="routeName" class="form-control" type="text"
+                            placeholder="Insira um nome para a rota" required>
+                            </InputText>
+                        </div>
+                        <input class="btn btn-secundary btn-aux fw-bold" type="submit" value="Construir rota" />
+                    </EditForm>
+                }
+                else
+                {
+                    <div class="mt-4">
+                        <span class="fs-5 spanF-big">Rota @routeName</span>
+                    </div>
+                    <div class="container mt-2 horizontal-scrollable">
+                        <div class="row text-start">
+                            <div class="col-4">
+                                @for (int i = 0; i < stopPointsInput.Count(); i++)
+                                {
+                                    @stopPointsInput[i]
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <EditForm Model="stopping" OnValidSubmit="@AddStopping">
+                        <div class="input-group mt-4">
+                            <InputText @bind-Value="stopping" class="form-control" type="text"
+                            placeholder="Insira um ponto de interesse" aria-describedby="AddButton" required>
+                            </InputText>
+                            @if(status == 3){
+                                <input class="btn btn-secundary AddButtonClass fw-bold" type="submit" value="Adicionar"
+                                id="AddButton" disabled/>
+                            }
+                            else{
+                                <input class="btn btn-secundary AddButtonClass fw-bold" type="submit" value="Adicionar"
+                                id="AddButton" />
+                            }
+                        </div>
+                    </EditForm>
+                    <EditForm Model="stopping" OnValidSubmit="@GetRoute">
+                        @if(status == 3){
+                            <input class="btn btn-secundary btn-aux fw-bold mt-4" type="submit" value="Obter rota" disabled/>
+                        }
+                        else{
+                            <input class="btn btn-secundary btn-aux fw-bold mt-4" type="submit" value="Obter rota"/>
+                        }
+                    </EditForm>
+                    <EditForm Model="stopping" OnValidSubmit="@GetBestRoute">
+                        @if(status == 3){
+                            <input class="btn btn-secundary btn-aux fw-bold mt-2" type="submit" value="Obter melhor rota" disabled />
+                        }
+                        else{
+                            <input class="btn btn-secundary btn-aux fw-bold mt-2" type="submit" value="Obter melhor rota" />
+                        }
+                    </EditForm>
+                }
+            </div>
+            <div class="col-6 friends">
+                <div class="container">
+                    <p class="specialP fs-5"><span class="spanF-big">Pontos de Interesse</span></p>
+                    <div class="vertical-scrollable" tabindex="0">
+                        <div class="row text-start">
+                            @{
+                                callingCreatePoints();
+                                foreach (var c in interestPoints)
+                                {
+                                    <div class="col-sm-8">@c.cidade - @c.nome</div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if(status == 3){
+    <div class="container">
+        <EditForm Model="status" OnValidSubmit="@closeRoute">
+            <input class="btn btn-secundary btn-aux fw-bold mt-4" type="submit" value="Criar nova rota" />
+        </EditForm>
+    </div>
+    }
+</body>
+
+</html>
+
+@code {
+    string stopping = "";
+    string logout = "";
+    int status = 0;
+    string routeName = "";
+    List<string> stopPoints = new List<string>();
+    List<string> stopPointsInput = new List<string>();
+    List<InterestPoint> interestPoints = new List<InterestPoint>();
+
+    private async void StartBuildRoute()
+    {   
+        List<string> names = new List<string>();
+        string route2 = "";
+        route2 = "Rota "+ routeName;
+        string sqlpoints = "SELECT nome FROM mydb.rota WHERE @Nome = nome";
+        names = await _data.LoadData<string, dynamic>(sqlpoints, new { Nome = route2}, _config.GetConnectionString("default"));
+        if (names.Count == 0 && routeName.Length < 25){
+            status = 2;
+        }
+        else{
+            status = 1;
+        }
+        helper.NavigateTo("Route");
+    }
+
+    private bool callingCreatePoints()
+    {
+        createPoints();
+        return true;
+    }
+
+    private async void createPoints()
+    {
+        string sqlpoints = "SELECT * FROM mydb.pontointeresse WHERE valido = 1";
+        interestPoints = await _data.LoadData<InterestPoint, dynamic>(sqlpoints, new { },
+        _config.GetConnectionString("default"));
+    }
+
+    private void AddStopping()
+    {
+        if (stopPointsInput.Count() == 0)
+            stopPointsInput.Add(stopping);
+        else
+            stopPointsInput.Add(", " + stopping);
+        stopPoints.Add(stopping);
+        helper.NavigateTo("Route");
+    }
+
+    private async Task GetRoute() // USAR API DA GOOGLE PARA OBTER ROTA e ADICIONAR HISTORICO DE ROTAS DO UTILIZADOR
+    {
+    
+        List<string> coords = new List<string>();
+        foreach (var points in interestPoints)
+        {
+            foreach (var nome in stopPoints)
+            {
+                if (nome.Equals(points.nome))
+                {
+                    coords.Add(points.coordenadas);
+                    break;
+                }
+            }
+        }
+        if (coords.Count > 0)
+            await JSRuntime.InvokeVoidAsync("getLocation", coords);
+
+        List<InterestPoint> pontosDaRota = new List<InterestPoint>();
+        //ADICIONAR À BASE DE DADOS E CRIAR PONTOS DE INTERESSE~
+
+        string sql2 = "INSERT INTO mydb.rota (nome) VALUES (@nome)";
+        await _data.SaveData(sql2, new { nome = "Rota " + routeName }, _config.GetConnectionString("default"));
+
+        foreach (var p in stopPoints)
+        {
+            //Criar e adicionar o objeto à lista
+            List<Category> categories = new List<Category>();
+            List<Evaluation> avaliacao = new List<Evaluation>();
+            List<InterestPoint> interestpoint = new List<InterestPoint>();
+
+            string sqlC2 = "SELECT CC.idcategoria, CC.descricao FROM mydb.pontointeresse_has_categoria AS C "
+            + "JOIN mydb.pontointeresse AS P ON C.pontointeresse_nome = P.nome "
+            + "JOIN mydb.categoria AS CC ON C.categoria_idcategoria = CC.idcategoria WHERE nome = @Nome";
+
+            categories = await _data.LoadData<Category, dynamic>(sqlC2, new { Nome = p }, _config.GetConnectionString("default"));
+
+            string sqlA = "SELECT A.idavaliacao, A.avaliacao, A.descricao FROM mydb.avaliacao AS A "
+            + "WHERE A.pontointeresse_nome = @Nome";
+
+            avaliacao = await _data.LoadData<Evaluation, dynamic>(sqlA, new { Nome = p }, _config.GetConnectionString("default"));
+
+            string sqlIP = "SELECT nome, descricao, cidade, coordenadas FROM mydb.pontointeresse WHERE nome = @Nome AND valido = 1";
+            interestpoint = await _data.LoadData<InterestPoint, dynamic>(sqlIP, new { Nome = p },
+            _config.GetConnectionString("default"));
+
+            pontosDaRota.Add(interestpoint[0].buildInterestPoint(avaliacao, categories, interestpoint[0]));
+
+            //Adicionar à tabela
+            string sql = "INSERT INTO mydb.rota_has_pontointeresse (Rota_nome, PontoInteresse_nome) "
+            + "VALUES (@rota_nome, @pontointeresse)";
+
+            await _data.SaveData(sql, new { rota_nome = "Rota " + routeName, pontointeresse = p }, _config.GetConnectionString("default"));
+        }
+
+        Route r = new Route("Rota " + routeName, pontosDaRota);
+        user.addRoute(r);
+        user.addXP(10);
+
+        string sqlUpdate = "UPDATE mydb.utilizador set nivel = @nivel WHERE email = @email";
+        await _data.SaveData(sqlUpdate, new { nivel = user.nivel, email = user.email }, _config.GetConnectionString("default"));
+
+        string sql3 = "INSERT INTO mydb.Utilizador_hashistorico_Rota (utilizador_email, rota_nome) "
+        + "VALUES (@user, @rota)";
+        await _data.SaveData(sql3, new { user = user.email, rota = "Rota " + routeName }, _config.GetConnectionString("default"));
+
+        status = 3;
+    }
+
+    private async Task GetBestRoute()
+    {
+        List<string> coords = new List<string>();
+        foreach (var points in interestPoints)
+        {
+            foreach (var nome in stopPoints)
+            {
+                if (nome.Equals(points.nome))
+                {
+                    coords.Add(points.coordenadas);
+                    break;
+                }
+            }
+        }
+        if (coords.Count > 0)
+            await JSRuntime.InvokeVoidAsync("getBestLocation", coords);
+
+            List<InterestPoint> pontosDaRota = new List<InterestPoint>();
+        //ADICIONAR À BASE DE DADOS E CRIAR PONTOS DE INTERESSE~
+
+        string sql2 = "INSERT INTO mydb.rota (nome) VALUES (@nome)";
+        await _data.SaveData(sql2, new { nome = "Rota " + routeName }, _config.GetConnectionString("default"));
+
+        foreach (var p in stopPoints)
+        {
+            //Criar e adicionar o objeto à lista
+            List<Category> categories = new List<Category>();
+            List<Evaluation> avaliacao = new List<Evaluation>();
+            List<InterestPoint> interestpoint = new List<InterestPoint>();
+
+            string sqlC2 = "SELECT CC.idcategoria, CC.descricao FROM mydb.pontointeresse_has_categoria AS C "
+            + "JOIN mydb.pontointeresse AS P ON C.pontointeresse_nome = P.nome "
+            + "JOIN mydb.categoria AS CC ON C.categoria_idcategoria = CC.idcategoria WHERE nome = @Nome";
+
+            categories = await _data.LoadData<Category, dynamic>(sqlC2, new { Nome = p }, _config.GetConnectionString("default"));
+
+            string sqlA = "SELECT A.idavaliacao, A.avaliacao, A.descricao FROM mydb.avaliacao AS A "
+            + "WHERE A.pontointeresse_nome = @Nome";
+
+            avaliacao = await _data.LoadData<Evaluation, dynamic>(sqlA, new { Nome = p }, _config.GetConnectionString("default"));
+
+            string sqlIP = "SELECT nome, descricao, cidade, coordenadas FROM mydb.pontointeresse WHERE nome = @Nome AND valido = 1";
+            interestpoint = await _data.LoadData<InterestPoint, dynamic>(sqlIP, new { Nome = p },
+            _config.GetConnectionString("default"));
+
+            pontosDaRota.Add(interestpoint[0].buildInterestPoint(avaliacao, categories, interestpoint[0]));
+
+            //Adicionar à tabela
+            string sql = "INSERT INTO mydb.rota_has_pontointeresse (Rota_nome, PontoInteresse_nome) "
+            + "VALUES (@rota_nome, @pontointeresse)";
+
+            await _data.SaveData(sql, new { rota_nome = "Rota " + routeName, pontointeresse = p }, _config.GetConnectionString("default"));
+        }
+
+        Route r = new Route("Rota " + routeName, pontosDaRota);
+        user.addRoute(r);
+        user.addXP(10);
+
+        string sqlUpdate = "UPDATE mydb.utilizador set nivel = @nivel WHERE email = @email";
+        await _data.SaveData(sqlUpdate, new { nivel = user.nivel, email = user.email }, _config.GetConnectionString("default"));
+
+        string sql3 = "INSERT INTO mydb.Utilizador_hashistorico_Rota (utilizador_email, rota_nome) "
+        + "VALUES (@user, @rota)";
+        await _data.SaveData(sql3, new { user = user.email, rota = "Rota " + routeName }, _config.GetConnectionString("default"));
+
+        status = 3;
+    }
+
+    public void closeRoute(){
+        status = 0;
+        stopping = "";
+        routeName = "";
+        stopPoints = new List<string>();
+        stopPointsInput = new List<string>();
+        interestPoints = new List<InterestPoint>();
+        helper.NavigateTo("/Route");
+
+    }
+    private async void deleteUser()
+    {
+        string sqlS = "UPDATE mydb.utilizador SET login = 0 WHERE email=@Email";
+        await _data.SaveData(sqlS, new { Email = user.email }, _config.GetConnectionString("default"));
+        user.deleteUser();
+        helper.NavigateTo("/", true);
+    }
+}

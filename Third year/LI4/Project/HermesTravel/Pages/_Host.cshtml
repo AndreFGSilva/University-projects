@@ -1,0 +1,140 @@
+﻿@page "/_Host"
+@using Microsoft.AspNetCore.Cors;
+@namespace HermesTravel.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+}
+
+<component type="typeof(App)" render-mode="ServerPrerendered" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script src="https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBqcDi6ocKOSz2bbk23A7jgIksedrGZNYo"></script>
+
+<script>
+    window.getLocation = (points) => {
+        var s = "";
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var saux = position.coords;
+                s = saux.latitude + "," + saux.longitude;
+                var linkgoogle = "https://www.google.com/maps/dir/?api=1&origin=";
+                var origin = s;
+                var linkgoogle_o = linkgoogle + origin.replace(", ","%2C");
+                console.log("Link final = "+linkgoogle_o);
+                var i;
+                linkgoogle_o = linkgoogle_o + "&destination=" + points[points.length -1].replace(", ","%2C");
+                if(points.length > 1)
+                    linkgoogle_o = linkgoogle_o + "&waypoints=" + points[0].replace(", ","%2C");
+                for (i = 1; i < points.length - 1; i++){
+                    console.log("Vou adicionar waypoint!");
+                    linkgoogle_o = linkgoogle_o + "%7C" + points[i].replace(", ","%2C");
+                }
+                console.log("Link final = "+linkgoogle_o);
+                var x = document.getElementById("demo");
+                x.innerHTML = "<a href="+linkgoogle_o+' target="_blank" ><span class="spanF">Rota</span></a>';
+            });
+        }
+    };
+</script>
+
+<script type = "text/javascript">
+    window.getBestLocation = (points) => {
+        var s = "";
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var saux = position.coords;
+                s = saux.latitude + "," + saux.longitude;
+                var linkgoogle = "https://www.google.com/maps/dir/?api=1&origin=";
+                var origin = s;
+                var linkgoogle_o = linkgoogle + origin.replace(", ","%2C");
+                var i;
+                console.log("Link final = "+linkgoogle_o);
+                points = bestRoute(s, points);
+                console.log("É uma lista = "+points);
+                linkgoogle_o = linkgoogle_o + "&destination=" + points[points.length -1].replace(", ","%2C");
+                if(points.length > 1)
+                    linkgoogle_o = linkgoogle_o + "&waypoints=" + points[0].replace(", ","%2C");
+                for (i = 1; i < points.length - 1; i++){
+                    console.log("Vou adicionar waypoint!");
+                    linkgoogle_o = linkgoogle_o + "%7C" + points[i].replace(", ","%2C");
+                }
+                console.log("Link final = "+linkgoogle_o);
+                var x = document.getElementById("demo");
+                x.innerHTML = "<a href="+linkgoogle_o+' target="_blank" ><span class="spanF">Rota</span></a>';
+            });
+        }
+    };
+
+    function bestRoute(s, points)
+    {
+        var p = permutation(points);
+        var rota = p[0];
+        var result;
+        var max = getTime(getLink(s, p[0]));
+        for (var i = 1; i < p.length; i++)
+        {
+            var temp = getTime(getLink(s, p[i]));
+            if (temp > max) {
+                max = temp;
+                rota = p[i];
+            }    
+        }
+        return rota;
+    }
+
+    function getLink(s, array)
+    {
+        var key = "&key=AIzaSyBqcDi6ocKOSz2bbk23A7jgIksedrGZNYo";
+        var linkgoogle = "https://maps.googleapis.com/maps/api/directions/json?origin=" + s.replace(", ","%2C");
+        var linkgoogle_o = linkgoogle + "&destination=" + array[array.length -1].replace(", ","%2C");
+        if(array.length > 1)
+            linkgoogle_o = linkgoogle_o + "&waypoints=" + array[0].replace(", ","%2C");
+        var i;
+        for (i = 1; i < array.length - 1; i++)
+        {
+            linkgoogle_o = linkgoogle_o + "%7C" + array[i].replace(", ","%2C");
+        }
+        linkgoogle_o = linkgoogle_o + key;
+        return linkgoogle_o;
+    }
+
+    function getTime(s)
+    {   
+        var list = [];
+        fetch('https://still-dusk-52181.herokuapp.com/' + s,
+        {headers: { "X-Requested-With": "XMLHttpRequest"}})
+        .then((response) => response.json())
+        .then((json) => {
+            var array = json.routes;
+            var legs = array[0].legs;
+            var i; var temp = 0;
+            for (i = 0; i < legs.length ; i++) {
+                var t = legs[i].duration.text.split(' ');
+                temp += parseInt(t[0]);
+            }
+            list.push(temp);    
+        });
+        return list[0];    
+    }
+
+    function permutation(array) {
+        function p(array, temp) {
+            var i, x;
+            if (!array.length) {
+                result.push(temp);
+            }
+            for (i = 0; i < array.length; i++) {
+                x = array.splice(i, 1)[0];
+                p(array, temp.concat(x));
+                array.splice(i, 0, x);
+            }
+        }
+        var result = [];
+        p(array, []);
+        return result;
+    }
+
+</script>
+
+
