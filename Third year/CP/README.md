@@ -1,5 +1,5 @@
-## Laboratórios de Informática 1
- **Pacman game in Haskell**
+## Cálculo de Programas
+ **Four problem resolutions with scientific programming in Haskell**
 
 #### Contributors:
  - [André Silva](https://github.com/AndreFGSilva)

@@ -4,4 +4,3 @@
 #### Contributors:
  - [André Silva](https://github.com/AndreFGSilva)
  - [João Gouveia](https://github.com/slocknad)
-
