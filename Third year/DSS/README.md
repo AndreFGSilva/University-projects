@@ -1,5 +1,5 @@
-## Laboratórios de Informática 4
- **Web app 'HermesTravel'. This app was done in HTML/CSS/JS/C#/SQL**
+## Desenvolvimento de Sistemas de Software
+ **System of a 'Repair Center' in Java**
 
 #### Contributors:
  - [André Silva](https://github.com/AndreFGSilva)

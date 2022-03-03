@@ -1,0 +1,12 @@
+c;alberto;142144444;alberto@gmail.com
+c;jose;333568652;jose@gmail.com
+e;0;Rato
+e;1;PC
+e;2;Rato
+t;fb;Armando Silva;as@gmail.com;123;4;5
+t;2;Joao Stone;j@gmail.com;456;2;2,0
+t;gt;Andre Silva;as@gmail.com;789;7.0
+t;fb;Joana Oliveira;jo@gmail.com;167;5;5
+p;0;0;333568652;0;4;3;2021-12-25T17:48:23.558;2021-12-30T23:49:16.182282700;2021-12-30T23:49:16.182282700;Abrir rato,Trocar parafuso,Fechar rato,qwe-5,90,5,2-10,20,10,2;102.0;false;false;false
+p;0;1;333568652;1;6;4;2021-11-25T16:03:50.440567;null;null;null;1010.0;false;false;false
+p;0;2;142144444;2;5;2;2021-07-25T17:48:23.558;2021-07-27T17:00:50;2021-08-25T18:00:05;Abrir rato,Trocar parafuso,Fechar rato-5,90,5-10,20,10;100.1;false;false;false

@@ -5,7 +5,7 @@
  - **[Comunicações por Computador]()** in C;
  - **[Desenvolvimento de Sistemas de Software]()** in Java;
  - **[Inteligência Artificial]()** in Prolog;
- - **[Laboratórios de Informática 4]()** in HTML/CSS/JS/C++/SQL;
+ - **[Laboratórios de Informática 4](https://github.com/AndreFGSilva/University-projects/tree/main/Third%20year/LI4)** in HTML/CSS/JS/C#/SQL;
  - **[Sistemas Distribuídos]()** in Java.
 
 ### Second Semester:
