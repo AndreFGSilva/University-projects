@@ -1,4 +1,4 @@
-## Sistemas Operativos
+## Sistemas Operativos (*Operative Systems*)
  **Filter application in audio files with client-server connection in C**
 
 #### Contributors:

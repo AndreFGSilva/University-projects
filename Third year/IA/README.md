@@ -1,4 +1,4 @@
-## Inteligência Artificial
+## Inteligência Artificial (*Artificial Intelligence*)
  **Knowledge representation system and reasoning in the logistic area of ​​order distribution in Prolog**
 
 #### Contributors:

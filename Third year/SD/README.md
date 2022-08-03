@@ -1,4 +1,4 @@
-## Sistemas Distribuídos
+## Sistemas Distribuídos (*Distributed Systems*)
  **Flight reservation plataform with client-server connection in a multithreading ambient in Java**
 
 #### Contributors:

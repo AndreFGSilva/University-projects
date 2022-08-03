@@ -1,4 +1,4 @@
-## Desenvolvimento de Sistemas de Software
+## Desenvolvimento de Sistemas de Software (*Software Systems Development*)
  **System of a 'Repair Center' in Java**
 
 #### Contributors:

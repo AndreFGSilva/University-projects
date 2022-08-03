@@ -1,4 +1,4 @@
-## Laboratórios de Informática 4
+## Laboratórios de Informática 4 (*Computer Labs 4*)
  **Web app 'HermesTravel'. This app was done in HTML/CSS/JS/C#/SQL**
 
 #### Contributors:

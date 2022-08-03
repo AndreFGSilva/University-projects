@@ -1,5 +1,4 @@
-## Computação Gráfica
-### *Computer Graphics*
+## Computação Gráfica (*Computer Graphics*)
  **Mini scene graph based 3D engine with a Solar System demo**
 
 #### Contributors:

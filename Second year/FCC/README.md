@@ -1,4 +1,4 @@
-## Fundamentos de Comunicação de Dados
+## Fundamentos de Comunicação de Dados (*Data Communications Fundamentals*)
  **Data compression using Shannon–Fano algorithm in C**
 
 #### Contributors:

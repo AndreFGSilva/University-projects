@@ -1,4 +1,4 @@
-## Laboratórios de Informática 2
+## Laboratórios de Informática 2 (*Computer Labs 2*)
  **Reversi game in C**
 
 #### Contributors:

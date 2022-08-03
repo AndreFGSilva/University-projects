@@ -1,4 +1,4 @@
-## Programação Orientada aos Objetos
+## Programação Orientada aos Objetos (*Object-Oriented Programming*)
  **Delivery of client orders app in Java**
 
 #### Contributors:

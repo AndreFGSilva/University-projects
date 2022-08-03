@@ -1,5 +1,5 @@
-## Laboratórios de Informática 3
- **C/Java**
+## Laboratórios de Informática 3 (*Computer Labs 3*)
+ **Big data processor done in C and Java**
 
 #### Contributors:
  - [André Silva](https://github.com/AndreFGSilva)

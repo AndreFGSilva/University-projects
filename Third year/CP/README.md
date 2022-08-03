@@ -1,4 +1,4 @@
-## Cálculo de Programas
+## Cálculo de Programas (*Program Calculation*)
  **Four problem resolutions with scientific programming in Haskell**
 
 #### Contributors:

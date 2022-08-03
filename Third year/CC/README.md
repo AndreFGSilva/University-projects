@@ -1,4 +1,4 @@
-## Comunicações por Computador
+## Comunicações por Computador (*Computer Communications*)
  **File transfer done in UDP connection between two clients in Java**
 
 #### Contributors:
