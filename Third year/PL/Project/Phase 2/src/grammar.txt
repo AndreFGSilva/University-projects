@@ -1,0 +1,48 @@
+P0 : App -> StartLex StartYacc
+
+P1 : StartLex -> DEFLEX LexMain
+
+P2 : StartYacc -> DEFYACC Yacc
+
+P3 : LexMain -> LexVariables LexFunctions
+
+P4 : LexVariables -> €
+P5 :               | LexVariables Reserved Comment
+
+P6 : LexFunctions -> LEXFUNCTIONS LFunctions
+
+P7 : Reserved -> PERCENTAGE NAME EQUAL EXPA Comment
+P8 :           | PERCENTAGE NAME EQUAL EXPB Comment
+P9 :           | PERCENTAGE NAME EQUAL EXPE Comment
+
+P10: LFunctions -> €
+P11:             | LFunctions Function Comment
+
+P12: Function -> RE RETURN LBR PL BD PL COMMA BD RBR
+P13:           | RE ERROR LBR READPRINT COMMA ERRORLINE RBR
+
+P14: Comment -> €
+P15:          | COMMENT
+
+P16: Yacc -> €
+P17:       | Yacc Defgrammar Comment
+P18:       | Yacc Yreserved Comment
+P19:       | Yacc Yvar Comment
+P20:       | Yacc Yall Comment
+
+P21: Defgrammar -> YACCGRAMMAR Ygrammar
+
+P22: Ygrammar -> €
+P23:           | Ygrammar DEFGRAM LCHV Grambody RCHV
+
+P24: Grambody -> €
+P25:           | GRAMRES
+
+P26: Yreserved -> PERCENTAGE NAME EQUAL EXPC
+
+P27: Yvar -> NAME EQUAL EXPD
+
+P28: Yall -> DOUBLEPERCENTAGE Yexp
+
+P29: Yexp -> €
+P30:       | Yexp EXP

@@ -1,0 +1,6 @@
+Número,Nome,Curso,NotasA{2},,,NotasB{0,3},,,,NotasC{1,3}::count,,,,resultado,NotasD{1,3}::average,,,,NotasE{2}::sum,,,NotasF{1,3}::mode,,,,NotasG{1,5}::median,,,,,
+1,andre,lei,1,2,,,,3,4,,bom,1,2,3,5,2,6,8,,1,6,4,8,3
+2,andre,lei,2,3,2,3,,4,5,,bom,2,3,4,6,3,6,6,7,2,6,3,7,
+3,andre,lei,3,4,3,4,,5,6,,bom,3,4,5,7,4,6,8,8,3,4,1,,
+4,andre,lei,4,5,4,5,,6,7,,bom,4,5,6,8,5,8,7,8,7,7,87,5,
+5,andre,lei,5,6,5,6,,7,8,,bom,5,6,7,9,6,6,6,,20,6,4,5,4
