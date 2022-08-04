@@ -1,5 +1,5 @@
 ## Processamento de Linguagens (*Language Processing*)
- **Phase 1: Processor with text filters**
+ **Phase 1: Processor with text filters**  
  **Phase 2: Specific text file compiler**
 
 #### Contributors:

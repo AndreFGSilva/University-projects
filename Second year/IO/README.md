@@ -1,5 +1,5 @@
 ## Investigação Operacional (*Operational Research*)
- **Phase 1: Drone path with different starting and ending using LPSolve**
+ **Phase 1: Drone path with different starting and ending using LPSolve**  
  **Phase 2: Team scheduling with fixed service times using Relax4 software**
 
 #### Contributors:

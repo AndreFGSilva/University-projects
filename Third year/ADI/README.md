@@ -1,6 +1,6 @@
 ## Aprendizagem e Decisão Inteligentes (*Intelligent Learning and Decision Making*)
- **Data processing and manipulation of two databases in KNIME (project files were too big for github, so I only added the report)**
- **Project A: Predict the soil temperature classification**
+ **Data processing and manipulation of two databases in KNIME (project files were too big for github, so I only added the report)**  
+ **Project A: Predict the soil temperature classification**  
  **Project B: Estimate the value of housing in a region of the USA**
 
 #### Contributors:
